@@ -470,12 +470,12 @@
                 wrongCats: ['😺', '😸', '😻', '😼', '😽', '🙀', '😿', '😾', '🐱', '🐈', '🐈‍⬛'],
                 catCount: 40,
                 spawnInterval: 400,
-                catLifetime: 2000,
-                timeLimit: 60,
-                instruction: 'Nhanh tay! Tìm mèo cười 😹 trong biển mèo!',
-                title: 'Màn 1: Thử Thách Cực Khó! 😹',
+                catLifetime: 2500,
+                timeLimit: null,
+                instruction: 'Tìm mèo cười 😹 - Không giới hạn thời gian!',
+                title: 'Màn 1: Thử Thách Đầu Tiên! 😹',
                 completeMessage: 'Tuyệt vời! Bạn quá giỏi! 🔥',
-                correctRate: 0.12
+                correctRate: 0.35
             },
             {
                 level: 2,
@@ -484,12 +484,12 @@
                 wrongCats: ['😺', '😸', '😹', '😻', '😼', '😽', '🙀', '😾', '🐱'],
                 catCount: 25,
                 spawnInterval: 700,
-                catLifetime: 2500,
-                timeLimit: 50,
-                instruction: 'Dễ hơn rồi! Tìm mèo buồn 😿',
+                catLifetime: 2800,
+                timeLimit: null,
+                instruction: 'Tìm mèo buồn 😿 - Chơi thoải mái nhé!',
                 title: 'Màn 2: Dễ Thở Hơn Rồi! 😿',
                 completeMessage: 'Sắp được rồi! Cố lên! 💪✨',
-                correctRate: 0.18
+                correctRate: 0.30
             },
             {
                 level: 3,
@@ -498,12 +498,12 @@
                 wrongCats: ['😺', '😸', '😹', '😼', '😽', '🙀', '😾'],
                 catCount: 15,
                 spawnInterval: 1200,
-                catLifetime: 3500,
-                timeLimit: 45,
-                instruction: 'Màn cuối! Tìm mèo trái tim 😻',
+                catLifetime: 4000,
+                timeLimit: null,
+                instruction: 'Màn cuối! Tìm mèo trái tim 😻 - Thư giãn thôi!',
                 title: 'Màn 3: Màn Dễ Nhất - Phần Thưởng Đang Chờ! 😻',
                 completeMessage: 'Chúc mừng bạn đã được trái tim của tên T! 💖',
-                correctRate: 0.25
+                correctRate: 0.35
             }
         ];
 
@@ -512,7 +512,6 @@
         let combo = 0;
         let spawnTimer = null;
         let activeCats = [];
-        let timeLeft = 60;
         let gameTimer = null;
 
         function createStars() {
@@ -542,42 +541,17 @@
             document.getElementById('progressBar').style.width = progress + '%';
             
             document.body.className = 'level' + (currentLevel + 1);
+            
+            // Ẩn timer vì không giới hạn thời gian
+            document.getElementById('timer').style.display = 'none';
         }
 
         function updateTimer() {
-            document.getElementById('timeText').textContent = timeLeft;
-            const timerEl = document.getElementById('timer');
-            
-            if (timeLeft <= 10) {
-                timerEl.classList.add('warning');
-            } else {
-                timerEl.classList.remove('warning');
-            }
-            
-            if (timeLeft <= 0) {
-                gameOver();
-            }
+            // Không còn timer nữa
         }
 
         function gameOver() {
-            clearInterval(spawnTimer);
-            clearInterval(gameTimer);
-            activeCats.forEach(cat => cat.remove());
-            activeCats = [];
-            
-            const modal = document.createElement('div');
-            modal.className = 'modal';
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <h2>⏰ Hết Giờ! ⏰</h2>
-                    <p>Điểm: ${score}/${levels[currentLevel].target}</p>
-                    <p>Thử lại nhé! 💪</p>
-                    <button class="modal-btn" id="restartBtn">Chơi Lại Màn Này 🔄</button>
-                </div>
-            `;
-            document.body.appendChild(modal);
-            
-            document.getElementById('restartBtn').addEventListener('click', restartLevel);
+            // Không còn game over vì không giới hạn thời gian
         }
 
         function restartLevel() {
@@ -586,10 +560,7 @@
             
             score = 0;
             combo = 0;
-            const level = levels[currentLevel];
-            timeLeft = level.timeLimit;
             updateUI();
-            updateTimer();
             startLevel();
         }
 
@@ -775,9 +746,7 @@
             currentLevel++;
             score = 0;
             combo = 0;
-            timeLeft = levels[currentLevel].timeLimit;
             updateUI();
-            updateTimer();
             createStars();
             startLevel();
         }
@@ -789,9 +758,7 @@
             currentLevel = 0;
             score = 0;
             combo = 0;
-            timeLeft = levels[0].timeLimit;
             updateUI();
-            updateTimer();
             createStars();
             startLevel();
         }
@@ -811,11 +778,6 @@
                 }
             }, level.spawnInterval);
             
-            gameTimer = setInterval(() => {
-                timeLeft--;
-                updateTimer();
-            }, 1000);
-            
             for (let i = 0; i < Math.min(8, level.catCount); i++) {
                 setTimeout(() => createCat(), i * 150);
             }
@@ -823,7 +785,6 @@
 
         createStars();
         updateUI();
-        updateTimer();
         startLevel();
 
         document.addEventListener('gesturestart', function (e) {
