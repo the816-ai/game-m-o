@@ -2,24 +2,45 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vương Quốc Mèo Dễ Thương</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Game Săn Mèo Tìm Trái Tim</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
             font-family: 'Comic Sans MS', 'Segoe UI', cursive, sans-serif;
-            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 25%, #ff9a9e 50%, #fecfef 75%, #feada6 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             overflow: hidden;
             position: relative;
+            transition: background 1s ease;
         }
 
-        .clouds {
+        body.level1 {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        body.level2 {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        body.level3 {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+        }
+
+        .game-container {
+            width: 100%;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stars {
             position: absolute;
             width: 100%;
             height: 100%;
@@ -27,17 +48,16 @@
             pointer-events: none;
         }
 
-        .cloud {
+        .star {
             position: absolute;
             background: white;
-            opacity: 0.6;
-            border-radius: 100px;
-            animation: float-cloud linear infinite;
+            border-radius: 50%;
+            animation: twinkle 2s infinite;
         }
 
-        @keyframes float-cloud {
-            from { transform: translateX(-200px); }
-            to { transform: translateX(calc(100vw + 200px)); }
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
         }
 
         .header {
@@ -46,609 +66,769 @@
             left: 0;
             right: 0;
             text-align: center;
-            padding: 25px;
-            background: rgba(255, 255, 255, 0.4);
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.4);
             backdrop-filter: blur(15px);
             z-index: 1000;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-            border-bottom: 3px solid rgba(255, 182, 193, 0.5);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         }
 
         .header h1 {
-            color: #ff6b9d;
-            font-size: 3em;
-            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.8);
-            animation: bounce-title 2s ease-in-out infinite;
-            display: inline-block;
+            color: white;
+            font-size: clamp(1.3em, 4.5vw, 2.2em);
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+            animation: glow 2s ease-in-out infinite;
         }
 
-        @keyframes bounce-title {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+        @keyframes glow {
+            0%, 100% { text-shadow: 0 0 20px rgba(255, 255, 255, 0.5); }
+            50% { text-shadow: 0 0 40px rgba(255, 255, 255, 1), 0 0 60px rgba(255, 182, 193, 0.8); }
         }
 
-        .controls {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 1000;
-            display: flex;
-            gap: 12px;
-            background: rgba(255, 255, 255, 0.5);
-            backdrop-filter: blur(15px);
-            padding: 18px 35px;
-            border-radius: 60px;
-            box-shadow: 0 8px 32px rgba(255, 105, 180, 0.3);
-            border: 3px solid rgba(255, 192, 203, 0.6);
-            flex-wrap: wrap;
-            justify-content: center;
-            max-width: 90%;
-        }
-
-        .btn {
-            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
-            color: #ff6b9d;
-            border: 3px solid #ff9a9e;
-            padding: 12px 22px;
-            font-size: 1em;
-            border-radius: 30px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(255, 154, 158, 0.4);
+        .level-info {
+            color: white;
+            font-size: clamp(0.9em, 3vw, 1.2em);
             font-weight: bold;
-        }
-
-        .btn:hover {
-            transform: scale(1.15) rotate(3deg);
-            box-shadow: 0 6px 25px rgba(255, 107, 157, 0.6);
-            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
-        }
-
-        .btn:active {
-            transform: scale(1.05);
+            margin-top: 8px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
         }
 
         .stats {
             position: fixed;
-            top: 120px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.6);
+            top: 110px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(15px);
-            padding: 25px;
-            border-radius: 25px;
-            box-shadow: 0 8px 32px rgba(255, 105, 180, 0.3);
+            padding: 15px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             z-index: 1000;
-            min-width: 180px;
-            border: 3px solid rgba(255, 192, 203, 0.6);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            min-width: 110px;
         }
 
         .stat-item {
-            margin: 15px 0;
+            margin: 10px 0;
             text-align: center;
         }
 
         .stat-number {
-            font-size: 2.5em;
-            background: linear-gradient(135deg, #ff6b9d, #c471ed);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-size: clamp(2em, 6vw, 2.8em);
+            color: white;
             font-weight: bold;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
         }
 
         .stat-label {
-            color: #ff6b9d;
-            font-size: 1em;
+            color: white;
+            font-size: clamp(0.75em, 2.5vw, 0.95em);
             font-weight: bold;
-            margin-top: 5px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
         }
 
-        .cat {
-            position: absolute;
-            font-size: 4em;
-            cursor: pointer;
-            z-index: 100;
-            filter: drop-shadow(0 6px 12px rgba(255, 105, 180, 0.4));
-            transition: all 0.2s ease;
-        }
-
-        .cat:hover {
-            transform: scale(1.4) rotate(15deg);
-            filter: drop-shadow(0 8px 20px rgba(255, 105, 180, 0.7));
-        }
-
-        .cat-name {
-            position: absolute;
-            top: -30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(255, 255, 255, 0.9);
-            padding: 5px 12px;
+        .progress-bar {
+            width: 100%;
+            height: 25px;
+            background: rgba(255, 255, 255, 0.3);
             border-radius: 15px;
-            font-size: 0.3em;
-            white-space: nowrap;
-            color: #ff6b9d;
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4ade80, #22c55e, #16a34a);
+            transition: width 0.5s ease;
+            border-radius: 15px;
+            box-shadow: 0 0 15px rgba(74, 222, 128, 0.8);
+        }
+
+        .combo {
+            position: fixed;
+            top: 110px;
+            left: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(15px);
+            padding: 15px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            min-width: 110px;
+            text-align: center;
+        }
+
+        .combo-number {
+            font-size: clamp(2.5em, 7vw, 3.5em);
+            color: #ffd700;
             font-weight: bold;
-            border: 2px solid #ff9a9e;
-            display: none;
+            text-shadow: 0 0 20px #ffd700;
         }
 
-        .cat:hover .cat-name {
-            display: block;
-        }
-
-        .heart-explosion {
-            position: absolute;
-            font-size: 1.5em;
-            pointer-events: none;
-            animation: heart-burst 1s ease-out forwards;
-            z-index: 200;
-        }
-
-        @keyframes heart-burst {
-            0% {
-                opacity: 1;
-                transform: translate(0, 0) scale(1) rotate(0deg);
-            }
-            100% {
-                opacity: 0;
-                transform: translate(var(--tx), var(--ty)) scale(2) rotate(720deg);
-            }
-        }
-
-        .paw-print {
-            position: absolute;
-            font-size: 1.2em;
-            opacity: 0.4;
-            pointer-events: none;
-            animation: fade-paw 2s forwards;
-            z-index: 50;
-            color: #ff9a9e;
-        }
-
-        @keyframes fade-paw {
-            to {
-                opacity: 0;
-                transform: scale(0.5);
-            }
-        }
-
-        .rainbow-trail {
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            pointer-events: none;
-            animation: rainbow-fade 1s forwards;
-            z-index: 50;
-        }
-
-        @keyframes rainbow-fade {
-            to {
-                opacity: 0;
-                transform: scale(2);
-            }
-        }
-
-        .meow-text {
-            position: absolute;
-            font-size: 1.5em;
-            color: #ff6b9d;
+        .combo-label {
+            color: white;
+            font-size: clamp(0.8em, 2.5vw, 1em);
             font-weight: bold;
-            pointer-events: none;
-            animation: float-away 2s forwards;
-            z-index: 200;
-            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.8);
-        }
-
-        @keyframes float-away {
-            0% {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-            100% {
-                opacity: 0;
-                transform: translateY(-100px) scale(1.5);
-            }
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
         }
 
         .playground {
             position: absolute;
             width: 100%;
             height: 100%;
-            overflow: hidden;
+            top: 0;
+            left: 0;
         }
 
-        .music-note {
+        .cat {
             position: absolute;
-            font-size: 2em;
-            animation: musical 3s ease-in-out infinite;
-            pointer-events: none;
-            color: #ff6b9d;
-            opacity: 0.6;
+            font-size: clamp(3em, 9vw, 5em);
+            cursor: pointer;
+            z-index: 100;
+            filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.5));
+            transition: transform 0.1s ease;
+            user-select: none;
+            animation: catFloat 2s ease-in-out infinite;
         }
 
-        @keyframes musical {
-            0%, 100% {
-                transform: translateY(0) rotate(0deg);
-                opacity: 0.6;
+        @keyframes catFloat {
+            0%, 100% { transform: translateY(0) rotate(-5deg); }
+            50% { transform: translateY(-15px) rotate(5deg); }
+        }
+
+        .cat:active {
+            transform: scale(1.3) rotate(15deg) !important;
+        }
+
+        .cat.wrong {
+            animation: shake 0.3s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .firework {
+            position: fixed;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            box-shadow: 0 0 10px currentColor;
+        }
+
+        @keyframes explode {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(var(--tx), var(--ty)) scale(0);
+            }
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(252, 182, 159, 0.95));
+            padding: clamp(25px, 6vw, 45px);
+            border-radius: 30px;
+            text-align: center;
+            max-width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            border: 5px solid rgba(255, 255, 255, 0.8);
+            animation: scaleIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0.3) rotate(-10deg); }
+            to { transform: scale(1) rotate(0deg); }
+        }
+
+        .modal-content h2 {
+            color: #ff6b9d;
+            font-size: clamp(2em, 6.5vw, 3.5em);
+            margin-bottom: 20px;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+            animation: bounce 0.6s ease infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .modal-content p {
+            color: #c471ed;
+            font-size: clamp(1.3em, 4.5vw, 2em);
+            margin: 15px 0;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.8);
+        }
+
+        .modal-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: clamp(14px, 3.5vw, 20px) clamp(30px, 7vw, 50px);
+            font-size: clamp(1.1em, 4vw, 1.6em);
+            border-radius: 35px;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.6);
+            font-weight: bold;
+            transition: all 0.3s ease;
+            border: 3px solid white;
+        }
+
+        .modal-btn:active {
+            transform: scale(0.92);
+        }
+
+        .big-heart {
+            font-size: clamp(6em, 22vw, 18em);
+            animation: heartBeat 1.2s ease-in-out infinite;
+            display: inline-block;
+            filter: drop-shadow(0 0 30px #ff1493);
+        }
+
+        @keyframes heartBeat {
+            0%, 100% { transform: scale(1); }
+            25% { transform: scale(1.3); }
+            50% { transform: scale(1.1); }
+            75% { transform: scale(1.25); }
+        }
+
+        .particle {
+            position: absolute;
+            pointer-events: none;
+            font-size: clamp(1.2em, 3.5vw, 1.8em);
+            animation: particleFloat 1s ease-out forwards;
+            z-index: 200;
+        }
+
+        @keyframes particleFloat {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0) scale(1) rotate(0deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(var(--tx), var(--ty)) scale(0.3) rotate(720deg);
+            }
+        }
+
+        .instruction {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            padding: clamp(15px, 3.5vw, 22px);
+            border-radius: 25px;
+            color: white;
+            font-size: clamp(1em, 3.2vw, 1.4em);
+            font-weight: bold;
+            border: 3px solid rgba(255, 255, 255, 0.5);
+            z-index: 1000;
+            text-align: center;
+            max-width: 90%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: translateX(-50%) scale(1); box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5); }
+            50% { transform: translateX(-50%) scale(1.08); box-shadow: 0 15px 50px rgba(255, 255, 255, 0.4); }
+        }
+
+        .combo-text {
+            position: absolute;
+            font-size: clamp(2em, 6vw, 4em);
+            font-weight: bold;
+            color: #ffd700;
+            text-shadow: 0 0 20px #ffd700, 0 0 40px #ffd700;
+            pointer-events: none;
+            animation: comboFloat 1s ease-out forwards;
+            z-index: 300;
+        }
+
+        @keyframes comboFloat {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0) scale(0.5);
             }
             50% {
-                transform: translateY(-30px) rotate(20deg);
-                opacity: 1;
+                transform: translate(0, -50px) scale(1.5);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(0, -100px) scale(1);
             }
         }
 
-        .love-meter {
+        .timer {
             position: fixed;
-            top: 120px;
-            left: 20px;
-            background: rgba(255, 255, 255, 0.6);
-            backdrop-filter: blur(15px);
-            padding: 20px;
-            border-radius: 25px;
-            box-shadow: 0 8px 32px rgba(255, 105, 180, 0.3);
+            top: 110px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            padding: 12px 25px;
+            border-radius: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.4);
             z-index: 1000;
-            min-width: 200px;
-            border: 3px solid rgba(255, 192, 203, 0.6);
         }
 
-        .love-bar {
-            width: 100%;
-            height: 25px;
-            background: rgba(255, 255, 255, 0.5);
-            border-radius: 15px;
-            overflow: hidden;
-            border: 2px solid #ff9a9e;
-            margin-top: 10px;
+        .timer-text {
+            color: white;
+            font-size: clamp(1.5em, 4vw, 2em);
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
         }
 
-        .love-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #ff6b9d, #c471ed, #ff6b9d);
-            background-size: 200% 100%;
-            animation: gradient-flow 2s ease infinite;
-            transition: width 0.5s ease;
-            border-radius: 15px;
+        .timer.warning {
+            animation: warning 0.5s ease infinite;
         }
 
-        @keyframes gradient-flow {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
-
-        @keyframes wiggle {
-            0%, 100% { transform: rotate(-3deg); }
-            50% { transform: rotate(3deg); }
+        @keyframes warning {
+            0%, 100% { background: rgba(255, 0, 0, 0.6); }
+            50% { background: rgba(255, 100, 0, 0.8); }
         }
     </style>
 </head>
-<body>
-    <div class="clouds" id="clouds"></div>
+<body class="level1">
+    <div class="stars" id="stars"></div>
+    
+    <div class="game-container">
+        <div class="header">
+            <h1>🐱 Game Săn Mèo Tìm Trái Tim 💖</h1>
+            <div class="level-info">
+                <span id="levelText">Màn 1: Thử Thách Cực Khó! 😹</span>
+            </div>
+        </div>
 
-    <div class="header">
-        <h1>🐱 VƯƠNG QUỐC MÈO DỄ THƯƠNG 🐱</h1>
+        <div class="timer" id="timer">
+            <div class="timer-text">⏰ <span id="timeText">60</span>s</div>
+        </div>
+
+        <div class="combo" id="combo">
+            <div class="combo-number" id="comboNumber">0</div>
+            <div class="combo-label">🔥 COMBO</div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-number" id="scoreText">0</div>
+                <div class="stat-label">⭐ Điểm</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="targetText">50</div>
+                <div class="stat-label">🎯 Mục Tiêu</div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <div class="instruction" id="instruction">
+            Nhanh tay! Tìm mèo cười 😹 trong biển mèo!
+        </div>
+
+        <div class="playground" id="playground"></div>
     </div>
-
-    <div class="love-meter">
-        <div style="text-align: center; color: #ff6b9d; font-weight: bold; font-size: 1.2em;">
-            ❤️ Tình Yêu Mèo ❤️
-        </div>
-        <div class="love-bar">
-            <div class="love-fill" id="loveFill" style="width: 0%"></div>
-        </div>
-        <div style="text-align: center; margin-top: 10px; color: #ff6b9d; font-weight: bold;">
-            <span id="lovePercent">0</span>%
-        </div>
-    </div>
-
-    <div class="stats">
-        <div class="stat-item">
-            <div class="stat-number" id="catCount">50</div>
-            <div class="stat-label">🐱 Số Mèo</div>
-        </div>
-        <div class="stat-item">
-            <div class="stat-number" id="clickCount">0</div>
-            <div class="stat-label">💖 Cục Cưng</div>
-        </div>
-        <div class="stat-item">
-            <div class="stat-number" id="meowCount">0</div>
-            <div class="stat-label">🔊 Meow</div>
-        </div>
-    </div>
-
-    <div class="controls">
-        <button class="btn" onclick="addManyCats(20)">➕ Thêm 20 Mèo</button>
-        <button class="btn" onclick="makeAllCatsMeow()">🔊 Tất Cả Meow</button>
-        <button class="btn" onclick="partyMode()">🎉 Party Mode</button>
-        <button class="btn" onclick="rainbowMode()">🌈 Rainbow</button>
-        <button class="btn" onclick="slowMotion()">🐢 Chậm</button>
-        <button class="btn" onclick="superSpeed()">🚀 Siêu Nhanh</button>
-        <button class="btn" onclick="resetAll()">🔄 Làm Mới</button>
-    </div>
-
-    <div class="playground" id="playground"></div>
 
     <script>
-        const catEmojis = [
-            '😺', '😸', '😹', '😻', '😼', '😽', '🙀', '😿', '😾',
-            '🐱', '🐈', '🐈‍⬛', '😺', '😸', '😹', '😻'
+        const levels = [
+            {
+                level: 1,
+                target: 50,
+                correctCat: '😹',
+                wrongCats: ['😺', '😸', '😻', '😼', '😽', '🙀', '😿', '😾', '🐱', '🐈', '🐈‍⬛'],
+                catCount: 40,
+                spawnInterval: 400,
+                catLifetime: 2000,
+                timeLimit: 60,
+                instruction: 'Nhanh tay! Tìm mèo cười 😹 trong biển mèo!',
+                title: 'Màn 1: Thử Thách Cực Khó! 😹',
+                completeMessage: 'Tuyệt vời! Bạn quá giỏi! 🔥',
+                correctRate: 0.12
+            },
+            {
+                level: 2,
+                target: 30,
+                correctCat: '😿',
+                wrongCats: ['😺', '😸', '😹', '😻', '😼', '😽', '🙀', '😾', '🐱'],
+                catCount: 25,
+                spawnInterval: 700,
+                catLifetime: 2500,
+                timeLimit: 50,
+                instruction: 'Dễ hơn rồi! Tìm mèo buồn 😿',
+                title: 'Màn 2: Dễ Thở Hơn Rồi! 😿',
+                completeMessage: 'Sắp được rồi! Cố lên! 💪✨',
+                correctRate: 0.18
+            },
+            {
+                level: 3,
+                target: 20,
+                correctCat: '😻',
+                wrongCats: ['😺', '😸', '😹', '😼', '😽', '🙀', '😾'],
+                catCount: 15,
+                spawnInterval: 1200,
+                catLifetime: 3500,
+                timeLimit: 45,
+                instruction: 'Màn cuối! Tìm mèo trái tim 😻',
+                title: 'Màn 3: Màn Dễ Nhất - Phần Thưởng Đang Chờ! 😻',
+                completeMessage: 'Chúc mừng bạn đã được trái tim của tên T! 💖',
+                correctRate: 0.25
+            }
         ];
-        
-        const catNames = [
-            'Miu', 'Luna', 'Simba', 'Bella', 'Tiger', 'Kitty', 'Whiskers', 'Misty',
-            'Felix', 'Mèo Con', 'Cutie', 'Fluffy', 'Snowball', 'Shadow', 'Ginger',
-            'Oscar', 'Mochi', 'Neko', 'Lily', 'Coco', 'Daisy', 'Ruby', 'Max'
-        ];
-        
-        const meowSounds = ['Meow~', 'Meow!', 'Meo meo~', 'Mew~', '=^.^=', 'Nya~', 'Mèo~'];
-        const heartEmojis = ['❤️', '💖', '💕', '💗', '💓', '💝', '💘', '💟'];
-        const rainbowColors = ['#ff6b9d', '#c471ed', '#12c2e9', '#ffd700', '#ff8c00', '#ff1493'];
-        
-        let cats = [];
-        let clickCount = 0;
-        let meowCount = 0;
-        let speedMultiplier = 1;
-        let isPartyMode = false;
-        let isRainbowMode = false;
 
-        // Tạo mây
-        function createClouds() {
-            const cloudsContainer = document.getElementById('clouds');
-            for (let i = 0; i < 15; i++) {
-                const cloud = document.createElement('div');
-                cloud.className = 'cloud';
-                const size = 60 + Math.random() * 100;
-                cloud.style.width = size + 'px';
-                cloud.style.height = size * 0.6 + 'px';
-                cloud.style.top = Math.random() * 70 + '%';
-                cloud.style.animationDuration = (20 + Math.random() * 30) + 's';
-                cloud.style.animationDelay = Math.random() * 10 + 's';
-                cloudsContainer.appendChild(cloud);
+        let currentLevel = 0;
+        let score = 0;
+        let combo = 0;
+        let spawnTimer = null;
+        let activeCats = [];
+        let timeLeft = 60;
+        let gameTimer = null;
+
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            starsContainer.innerHTML = '';
+            for (let i = 0; i < 80; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.width = Math.random() * 3 + 1 + 'px';
+                star.style.height = star.style.width;
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 2 + 's';
+                starsContainer.appendChild(star);
             }
         }
 
-        class Cat {
-            constructor() {
-                this.element = document.createElement('div');
-                this.element.className = 'cat';
-                
-                this.emoji = catEmojis[Math.floor(Math.random() * catEmojis.length)];
-                this.name = catNames[Math.floor(Math.random() * catNames.length)];
-                
-                const nameSpan = document.createElement('div');
-                nameSpan.className = 'cat-name';
-                nameSpan.textContent = this.name;
-                this.element.appendChild(nameSpan);
-                
-                const emojiSpan = document.createElement('span');
-                emojiSpan.textContent = this.emoji;
-                this.element.appendChild(emojiSpan);
-                
-                this.x = Math.random() * (window.innerWidth - 100);
-                this.y = 150 + Math.random() * (window.innerHeight - 300);
-                this.vx = (Math.random() - 0.5) * 3;
-                this.vy = (Math.random() - 0.5) * 3;
-                this.element.style.left = this.x + 'px';
-                this.element.style.top = this.y + 'px';
-                
-                this.element.addEventListener('click', () => this.onClick());
-                document.getElementById('playground').appendChild(this.element);
-                
-                this.pawTimer = 0;
-                this.trailTimer = 0;
-            }
-
-            onClick() {
-                clickCount++;
-                document.getElementById('clickCount').textContent = clickCount;
-                
-                // Cập nhật thanh tình yêu
-                const lovePercent = Math.min(100, Math.floor((clickCount / cats.length) * 10));
-                document.getElementById('loveFill').style.width = lovePercent + '%';
-                document.getElementById('lovePercent').textContent = lovePercent;
-                
-                // Bùng nổ trái tim
-                for (let i = 0; i < 12; i++) {
-                    this.createHeartExplosion();
-                }
-                
-                // Hiển thị meow
-                this.showMeow();
-                
-                // Thay đổi emoji
-                this.emoji = catEmojis[Math.floor(Math.random() * catEmojis.length)];
-                this.element.querySelector('span').textContent = this.emoji;
-                
-                // Nhảy và quay
-                this.vy = -8;
-                this.vx = (Math.random() - 0.5) * 12;
-                this.element.style.animation = 'wiggle 0.3s ease';
-                setTimeout(() => {
-                    this.element.style.animation = '';
-                }, 300);
-            }
-
-            createHeartExplosion() {
-                const heart = document.createElement('div');
-                heart.className = 'heart-explosion';
-                heart.textContent = heartEmojis[Math.floor(Math.random() * heartEmojis.length)];
-                heart.style.left = this.x + 30 + 'px';
-                heart.style.top = this.y + 30 + 'px';
-                
-                const angle = Math.random() * Math.PI * 2;
-                const distance = 80 + Math.random() * 80;
-                heart.style.setProperty('--tx', Math.cos(angle) * distance + 'px');
-                heart.style.setProperty('--ty', Math.sin(angle) * distance + 'px');
-                
-                document.getElementById('playground').appendChild(heart);
-                setTimeout(() => heart.remove(), 1000);
-            }
-
-            showMeow() {
-                meowCount++;
-                document.getElementById('meowCount').textContent = meowCount;
-                
-                const meow = document.createElement('div');
-                meow.className = 'meow-text';
-                meow.textContent = meowSounds[Math.floor(Math.random() * meowSounds.length)];
-                meow.style.left = this.x + 'px';
-                meow.style.top = this.y - 20 + 'px';
-                document.getElementById('playground').appendChild(meow);
-                setTimeout(() => meow.remove(), 2000);
-            }
-
-            update(deltaTime) {
-                this.x += this.vx * speedMultiplier;
-                this.y += this.vy * speedMultiplier;
-
-                // Bounce
-                if (this.x <= 0 || this.x >= window.innerWidth - 80) {
-                    this.vx *= -1;
-                    this.x = Math.max(0, Math.min(this.x, window.innerWidth - 80));
-                }
-                if (this.y <= 120 || this.y >= window.innerHeight - 200) {
-                    this.vy *= -1;
-                    this.y = Math.max(120, Math.min(this.y, window.innerHeight - 200));
-                }
-
-                // Vệt chân
-                this.pawTimer += deltaTime;
-                if (this.pawTimer > 200) {
-                    this.createPawPrint();
-                    this.pawTimer = 0;
-                }
-
-                // Rainbow trail
-                if (isRainbowMode) {
-                    this.trailTimer += deltaTime;
-                    if (this.trailTimer > 100) {
-                        this.createRainbowTrail();
-                        this.trailTimer = 0;
-                    }
-                }
-
-                this.element.style.left = this.x + 'px';
-                this.element.style.top = this.y + 'px';
-
-                // Xoay theo hướng
-                if (this.vx < 0) {
-                    this.element.style.transform = 'scaleX(-1)';
-                } else {
-                    this.element.style.transform = 'scaleX(1)';
-                }
-
-                // Party mode - thay đổi màu
-                if (isPartyMode) {
-                    this.element.style.filter = `drop-shadow(0 6px 12px ${rainbowColors[Math.floor(Math.random() * rainbowColors.length)]})`;
-                }
-            }
-
-            createPawPrint() {
-                const paw = document.createElement('div');
-                paw.className = 'paw-print';
-                paw.textContent = '🐾';
-                paw.style.left = this.x + 20 + 'px';
-                paw.style.top = this.y + 40 + 'px';
-                document.getElementById('playground').appendChild(paw);
-                setTimeout(() => paw.remove(), 2000);
-            }
-
-            createRainbowTrail() {
-                const trail = document.createElement('div');
-                trail.className = 'rainbow-trail';
-                trail.style.left = this.x + 30 + 'px';
-                trail.style.top = this.y + 30 + 'px';
-                trail.style.background = rainbowColors[Math.floor(Math.random() * rainbowColors.length)];
-                document.getElementById('playground').appendChild(trail);
-                setTimeout(() => trail.remove(), 1000);
-            }
-
-            remove() {
-                this.element.remove();
-            }
-        }
-
-        function addManyCats(count) {
-            for (let i = 0; i < count; i++) {
-                cats.push(new Cat());
-            }
-            document.getElementById('catCount').textContent = cats.length;
-        }
-
-        function makeAllCatsMeow() {
-            cats.forEach((cat, index) => {
-                setTimeout(() => {
-                    cat.showMeow();
-                    cat.vy = -6;
-                }, index * 50);
-            });
-        }
-
-        function partyMode() {
-            isPartyMode = !isPartyMode;
-            if (isPartyMode) {
-                document.body.style.animation = 'gradient-flow 3s ease infinite';
-            } else {
-                document.body.style.animation = '';
-            }
-        }
-
-        function rainbowMode() {
-            isRainbowMode = !isRainbowMode;
-        }
-
-        function slowMotion() {
-            speedMultiplier = 0.3;
-        }
-
-        function superSpeed() {
-            speedMultiplier = 3;
-        }
-
-        function resetAll() {
-            cats.forEach(cat => cat.remove());
-            cats = [];
-            clickCount = 0;
-            meowCount = 0;
-            speedMultiplier = 1;
-            isPartyMode = false;
-            isRainbowMode = false;
-            document.getElementById('clickCount').textContent = 0;
-            document.getElementById('meowCount').textContent = 0;
-            document.getElementById('loveFill').style.width = '0%';
-            document.getElementById('lovePercent').textContent = 0;
-            addManyCats(50);
-        }
-
-        let lastTime = Date.now();
-        function animate() {
-            const currentTime = Date.now();
-            const deltaTime = currentTime - lastTime;
-            lastTime = currentTime;
+        function updateUI() {
+            const level = levels[currentLevel];
+            document.getElementById('levelText').textContent = level.title;
+            document.getElementById('scoreText').textContent = score;
+            document.getElementById('targetText').textContent = level.target;
+            document.getElementById('instruction').textContent = level.instruction;
+            document.getElementById('comboNumber').textContent = combo;
             
-            cats.forEach(cat => cat.update(deltaTime));
-            requestAnimationFrame(animate);
+            const progress = Math.min(100, (score / level.target) * 100);
+            document.getElementById('progressBar').style.width = progress + '%';
+            
+            document.body.className = 'level' + (currentLevel + 1);
         }
 
-        // Khởi tạo
-        createClouds();
-        addManyCats(50);
-        animate();
-
-        // Thêm nốt nhạc bay
-        setInterval(() => {
-            if (cats.length > 0 && Math.random() < 0.3) {
-                const note = document.createElement('div');
-                note.className = 'music-note';
-                note.textContent = ['♪', '♫', '♬', '♩'][Math.floor(Math.random() * 4)];
-                note.style.left = Math.random() * 100 + '%';
-                note.style.top = Math.random() * 100 + '%';
-                note.style.animationDelay = Math.random() + 's';
-                document.getElementById('playground').appendChild(note);
-                setTimeout(() => note.remove(), 3000);
+        function updateTimer() {
+            document.getElementById('timeText').textContent = timeLeft;
+            const timerEl = document.getElementById('timer');
+            
+            if (timeLeft <= 10) {
+                timerEl.classList.add('warning');
+            } else {
+                timerEl.classList.remove('warning');
             }
-        }, 1000);
+            
+            if (timeLeft <= 0) {
+                gameOver();
+            }
+        }
+
+        function gameOver() {
+            clearInterval(spawnTimer);
+            clearInterval(gameTimer);
+            activeCats.forEach(cat => cat.remove());
+            activeCats = [];
+            
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <h2>⏰ Hết Giờ! ⏰</h2>
+                    <p>Điểm: ${score}/${levels[currentLevel].target}</p>
+                    <p>Thử lại nhé! 💪</p>
+                    <button class="modal-btn" id="restartBtn">Chơi Lại Màn Này 🔄</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            document.getElementById('restartBtn').addEventListener('click', restartLevel);
+        }
+
+        function restartLevel() {
+            const modal = document.querySelector('.modal');
+            if (modal) modal.remove();
+            
+            score = 0;
+            combo = 0;
+            const level = levels[currentLevel];
+            timeLeft = level.timeLimit;
+            updateUI();
+            updateTimer();
+            startLevel();
+        }
+
+        function createCat() {
+            const level = levels[currentLevel];
+            const cat = document.createElement('div');
+            cat.className = 'cat';
+            
+            const isCorrect = Math.random() < level.correctRate;
+            const emoji = isCorrect ? level.correctCat : level.wrongCats[Math.floor(Math.random() * level.wrongCats.length)];
+            
+            cat.textContent = emoji;
+            cat.dataset.correct = isCorrect;
+            
+            const x = Math.random() * (window.innerWidth - 100);
+            const y = 200 + Math.random() * (window.innerHeight - 350);
+            cat.style.left = x + 'px';
+            cat.style.top = y + 'px';
+            cat.style.animationDelay = Math.random() * 2 + 's';
+            
+            const handleClick = function() {
+                handleCatClick(cat, x, y, isCorrect);
+            };
+            
+            cat.addEventListener('click', handleClick);
+            cat.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                handleClick();
+            });
+            
+            document.getElementById('playground').appendChild(cat);
+            activeCats.push(cat);
+            
+            setTimeout(() => {
+                if (cat.parentElement) {
+                    cat.remove();
+                    activeCats = activeCats.filter(c => c !== cat);
+                }
+            }, level.catLifetime);
+        }
+
+        function handleCatClick(cat, x, y, isCorrect) {
+            if (!cat.parentElement) return;
+            
+            if (isCorrect) {
+                score++;
+                combo++;
+                updateUI();
+                
+                const points = combo > 1 ? combo : 1;
+                createParticles(x, y, ['❤️', '💖', '💕', '⭐', '✨', '🌟'], points);
+                
+                if (combo > 3) {
+                    showComboText(x, y, combo);
+                }
+                
+                cat.style.transform = 'scale(1.5) rotate(360deg)';
+                cat.style.transition = 'all 0.3s ease';
+                
+                setTimeout(() => {
+                    if (cat.parentElement) {
+                        cat.remove();
+                        activeCats = activeCats.filter(c => c !== cat);
+                    }
+                }, 300);
+                
+                if (score >= levels[currentLevel].target) {
+                    levelComplete();
+                }
+            } else {
+                combo = 0;
+                updateUI();
+                createParticles(x, y, ['💔', '😢', '❌']);
+                cat.classList.add('wrong');
+                cat.style.filter = 'grayscale(100%) brightness(0.5)';
+            }
+        }
+
+        function showComboText(x, y) {
+            const comboText = document.createElement('div');
+            comboText.className = 'combo-text';
+            comboText.textContent = `${combo}x COMBO! 🔥`;
+            comboText.style.left = x + 'px';
+            comboText.style.top = y + 'px';
+            document.getElementById('playground').appendChild(comboText);
+            setTimeout(() => comboText.remove(), 1000);
+        }
+
+        function createParticles(x, y, emojis, count = 12) {
+            for (let i = 0; i < count; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                particle.style.left = x + 'px';
+                particle.style.top = y + 'px';
+                
+                const angle = (Math.PI * 2 * i) / count;
+                const distance = 70 + Math.random() * 50;
+                particle.style.setProperty('--tx', Math.cos(angle) * distance + 'px');
+                particle.style.setProperty('--ty', Math.sin(angle) * distance + 'px');
+                
+                document.getElementById('playground').appendChild(particle);
+                setTimeout(() => particle.remove(), 1000);
+            }
+        }
+
+        function createFireworks() {
+            const colors = ['#ff6b9d', '#c471ed', '#ffd700', '#ff1493', '#00ffff', '#ff69b4', '#7fff00'];
+            
+            for (let i = 0; i < 8; i++) {
+                setTimeout(() => {
+                    const x = Math.random() * window.innerWidth;
+                    const y = Math.random() * (window.innerHeight * 0.6);
+                    
+                    for (let j = 0; j < 40; j++) {
+                        const firework = document.createElement('div');
+                        firework.className = 'firework';
+                        firework.style.left = x + 'px';
+                        firework.style.top = y + 'px';
+                        const color = colors[Math.floor(Math.random() * colors.length)];
+                        firework.style.background = color;
+                        firework.style.color = color;
+                        
+                        const angle = (Math.PI * 2 * j) / 40;
+                        const distance = 120 + Math.random() * 120;
+                        firework.style.setProperty('--tx', Math.cos(angle) * distance + 'px');
+                        firework.style.setProperty('--ty', Math.sin(angle) * distance + 'px');
+                        firework.style.animation = 'explode 1.5s ease-out forwards';
+                        
+                        document.body.appendChild(firework);
+                        setTimeout(() => firework.remove(), 1500);
+                    }
+                }, i * 250);
+            }
+        }
+
+        function levelComplete() {
+            clearInterval(spawnTimer);
+            clearInterval(gameTimer);
+            activeCats.forEach(cat => cat.remove());
+            activeCats = [];
+            
+            createFireworks();
+            
+            setTimeout(() => {
+                const level = levels[currentLevel];
+                const modal = document.createElement('div');
+                modal.className = 'modal';
+                
+                let content = `
+                    <div class="modal-content">
+                        <h2>🎉 Hoàn Thành Màn ${level.level}! 🎉</h2>
+                        <p style="font-size: clamp(1.5em, 5vw, 2.3em);">${level.completeMessage}</p>
+                        <p>Điểm: ${score} | Combo Cao Nhất: ${combo}</p>
+                `;
+                
+                if (currentLevel < levels.length - 1) {
+                    content += `<button class="modal-btn" id="nextBtn">Sang Màn Tiếp ➡️</button>`;
+                } else {
+                    content += `
+                        <div class="big-heart">❤️</div>
+                        <p style="font-size: clamp(1.6em, 5.5vw, 2.8em); margin-top: 25px;">Chúc mừng bạn đã được trái tim của tên T!</p>
+                        <button class="modal-btn" id="restartGameBtn">Chơi Lại 🔄</button>
+                    `;
+                }
+                
+                content += `</div>`;
+                modal.innerHTML = content;
+                document.body.appendChild(modal);
+                
+                if (currentLevel < levels.length - 1) {
+                    document.getElementById('nextBtn').addEventListener('click', nextLevel);
+                } else {
+                    document.getElementById('restartGameBtn').addEventListener('click', restartGame);
+                }
+            }, 500);
+        }
+
+        function nextLevel() {
+            const modal = document.querySelector('.modal');
+            if (modal) modal.remove();
+            
+            currentLevel++;
+            score = 0;
+            combo = 0;
+            timeLeft = levels[currentLevel].timeLimit;
+            updateUI();
+            updateTimer();
+            createStars();
+            startLevel();
+        }
+
+        function restartGame() {
+            const modal = document.querySelector('.modal');
+            if (modal) modal.remove();
+            
+            currentLevel = 0;
+            score = 0;
+            combo = 0;
+            timeLeft = levels[0].timeLimit;
+            updateUI();
+            updateTimer();
+            createStars();
+            startLevel();
+        }
+
+        function startLevel() {
+            const level = levels[currentLevel];
+            
+            clearInterval(spawnTimer);
+            clearInterval(gameTimer);
+            
+            activeCats.forEach(cat => cat.remove());
+            activeCats = [];
+            
+            spawnTimer = setInterval(() => {
+                if (activeCats.length < level.catCount) {
+                    createCat();
+                }
+            }, level.spawnInterval);
+            
+            gameTimer = setInterval(() => {
+                timeLeft--;
+                updateTimer();
+            }, 1000);
+            
+            for (let i = 0; i < Math.min(8, level.catCount); i++) {
+                setTimeout(() => createCat(), i * 150);
+            }
+        }
+
+        createStars();
+        updateUI();
+        updateTimer();
+        startLevel();
+
+        document.addEventListener('gesturestart', function (e) {
+            e.preventDefault();
+        });
     </script>
 </body>
 </html>
